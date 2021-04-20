@@ -34,19 +34,6 @@ param(
 
 if (-not $restart) {
     # initial
-    [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/$branch/scripts/mountAzFileShare.ps1", 5, 10, $null, "c:\scripts\mountAzFileShare.ps1", $false)
-
-    $tries = 1
-    while ($tries -le 10) { 
-        Write-Host "Trying to mount Azure File Share"
-        . c:\scripts\mountAzFileShare.ps1 -storageAccountName "$storageAccountName" -storageAccountKey "$storageAccountKey" -driveLetter "S"
-        if (Test-Path "S:") {
-            $tries = 11
-        }
-        Write-Host "Try $tries failed"
-        $tries = $tries + 1
-        Start-Sleep -Seconds 30
-    }
 
     # Setup profile
     Write-Debug "Download profile file"
