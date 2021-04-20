@@ -53,42 +53,28 @@ param(
 )
 
 if (-not $restart) {
-    $tries = 1
-    while ($tries -le 10) { 
-        Write-Debug "Trying to mount Azure File Share"
-        . c:\scripts\mountAzFileShare.ps1 -storageAccountName "$storageAccountName" -storageAccountKey "$storageAccountKey" -driveLetter "S"
-        if (Test-Path "S:") {
-            $tries = 11
-        }
-        else {
-            Write-Debug "Try $tries failed, sleep and try again"
-            $tries = $tries + 1
-            Start-Sleep -Seconds 30
-            Write-Debug "awoke for try $tries"
-        }
-    }
     if ($isFirstMgr) {
         Write-Debug "create folders"
-        New-Item -Path s:\le -ItemType Directory | Out-Null	
-        New-Item -Path s:\le\acme.json | Out-Null
+        New-Item -Path C:\le -ItemType Directory | Out-Null	
+        New-Item -Path C:\le\acme.json | Out-Null
 
         Write-Debug "Create overlay network"
         Invoke-Expression "docker network create --driver=overlay traefik-public" | Out-Null
         Start-Sleep -Seconds 10
 
         Write-Debug "Create folders"
-        New-Item -Path s:\compose -ItemType Directory | Out-Null
-        New-Item -Path s:\compose\base -ItemType Directory | Out-Null
-        New-Item -Path s:\portainer-data -ItemType Directory | Out-Null
+        New-Item -Path C:\compose -ItemType Directory | Out-Null
+        New-Item -Path C:\compose\base -ItemType Directory | Out-Null
+        New-Item -Path C:\portainer-data -ItemType Directory | Out-Null
 
         Write-Debug "Download compose file"
-        [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/cosmoconsult/azure-swarm/$branch/configs/docker-compose.yml.template", 5, 10, $null, 's:\compose\base\docker-compose.yml.template', $false)
-        $template = Get-Content 's:\compose\base\docker-compose.yml.template' -Raw
+        [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/$branch/configs/docker-compose.yml.template", 5, 10, $null, 'C:\compose\base\docker-compose.yml.template', $false)
+        $template = Get-Content 'C:\compose\base\docker-compose.yml.template' -Raw
         $expanded = Invoke-Expression "@`"`r`n$template`r`n`"@"
-        $expanded | Out-File "s:\compose\base\docker-compose.yml" -Encoding ASCII
+        $expanded | Out-File "C:\compose\base\docker-compose.yml" -Encoding ASCII
 
         Write-Debug "Deploy Portainer / Traefik"
-        Invoke-Expression "docker stack deploy -c s:\compose\base\docker-compose.yml base"
+        Invoke-Expression "docker stack deploy -c C:\compose\base\docker-compose.yml base"
     }
 
     # SSH and Choco setup
@@ -99,7 +85,7 @@ if (-not $restart) {
     choco install --no-progress --limit-output openssh -params '"/SSHServerFeature"'
 
     Write-Debug "Download ssh config file"
-    [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/cosmoconsult/azure-swarm/$branch/configs/sshd_config_wpwd", 5, 10, $null, 'C:\ProgramData\ssh\sshd_config', $false)
+    [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/$branch/configs/sshd_config_wpwd", 5, 10, $null, 'C:\ProgramData\ssh\sshd_config', $false)
 
     Write-Debug "try to get access token"
     $content = [DownloadWithRetry]::DoDownloadWithRetry('http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.azure.net', 5, 10, $null, $null, $true) | ConvertFrom-Json

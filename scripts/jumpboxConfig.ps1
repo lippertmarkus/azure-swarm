@@ -50,14 +50,14 @@ else {
 if (-not $restart) {
     # Setup profile
     Write-Debug "Download profile file"
-    [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/cosmoconsult/azure-swarm/$branch/scripts/profile.ps1", 5, 10, $null, $PROFILE.AllUsersAllHosts, $false)
+    [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/$branch/scripts/profile.ps1", 5, 10, $null, $PROFILE.AllUsersAllHosts, $false)
     
     # SSH and Choco setup
     Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
     choco feature enable -n allowGlobalConfirmation
     choco install --no-progress --limit-output vim
     choco install --no-progress --limit-output openssh -params '"/SSHServerFeature"'
-    [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/cosmoconsult/azure-swarm/$branch/configs/sshd_config_wopwd", 5, 10, $null, 'C:\ProgramData\ssh\sshd_config', $false)
+    [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/$branch/configs/sshd_config_wopwd", 5, 10, $null, 'C:\ProgramData\ssh\sshd_config', $false)
 
     Write-Host "try to get access token"
     $content = [DownloadWithRetry]::DoDownloadWithRetry('http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fvault.azure.net', 5, 10, $null, $null, $true) | ConvertFrom-Json

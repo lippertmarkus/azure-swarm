@@ -78,21 +78,6 @@ Install-Module DockerMsftProvider -Force
 Install-Package Docker -ProviderName DockerMsftProvider -Force
 Start-Service docker
 
-Write-Debug "Setup data disk"
-$disks = Get-Disk | Where-Object partitionstyle -eq 'raw' | Sort-Object number
-$letters = 70..89 | ForEach-Object { [char]$_ }
-$count = 0
-$labels = "data1", "data2"
-
-foreach ($disk in $disks) {
-    $driveLetter = $letters[$count].ToString()
-    $disk | 
-    Initialize-Disk -PartitionStyle MBR -PassThru |
-    New-Partition -UseMaximumSize -DriveLetter $driveLetter |
-    Format-Volume -FileSystem NTFS -NewFileSystemLabel $labels[$count] -Confirm:$false -Force
-    $count++
-}
-
 Write-Debug "Handle additional pre script"
 if ($additionalPreScript -ne "") {
     Write-Debug "Download script"
@@ -220,12 +205,11 @@ if (!(Test-Path -Path $PROFILE.AllUsersAllHosts)) {
     New-Item -ItemType File -Path $PROFILE.AllUsersAllHosts -Force
 }
 Write-Debug "Download profile file"
-[DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/cosmoconsult/azure-swarm/$branch/scripts/profile.ps1", 5, 10, $null, $PROFILE.AllUsersAllHosts, $false)
+[DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/$branch/scripts/profile.ps1", 5, 10, $null, $PROFILE.AllUsersAllHosts, $false)
 
 # Setup tasks
 Write-Debug "Download task files"
-[DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/cosmoconsult/azure-swarm/$branch/scripts/mgrConfig.ps1", 5, 10, $null, "c:\scripts\mgrConfig.ps1", $false)
-[DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/cosmoconsult/azure-swarm/$branch/scripts/mountAzFileShare.ps1", 5, 10, $null, "c:\scripts\mountAzFileShare.ps1", $false)
+[DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/$branch/scripts/mgrConfig.ps1", 5, 10, $null, "c:\scripts\mgrConfig.ps1", $false)
 
 Write-Debug "call mgrConfig script"
 & 'c:\scripts\mgrConfig.ps1' -name "$name" -externaldns "$externaldns" -cleanupThresholdGb $cleanupThresholdGb -cosmoInternal "$cosmoInternal" -dockerdatapath "$dockerdatapath" -email "$email" -additionalPostScript "$additionalPostScript" -branch "$branch" -storageAccountName "$storageAccountName" -storageAccountKey "$storageAccountKey" -isFirstMgr:$isFirstMgr -authToken "$authToken" 2>&1 >> c:\scripts\log.txt

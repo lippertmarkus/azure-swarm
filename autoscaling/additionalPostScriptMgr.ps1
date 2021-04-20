@@ -59,15 +59,15 @@ if (-not $restart) {
     Start-Service docker
 
     if ($isFirstMgr) {
-        New-Item -Path s:\compose\autoscaling -ItemType Directory | Out-Null
+        New-Item -Path C:\compose\autoscaling -ItemType Directory | Out-Null
 
-        [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/$branch/autoscaling/docker-compose.yml.template", 5, 10, $authToken, "s:\compose\autoscaling\docker-compose.yml.template")
+        [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/$branch/autoscaling/docker-compose.yml.template", 5, 10, $authToken, "C:\compose\autoscaling\docker-compose.yml.template")
         
-        $template = Get-Content 's:\compose\autoscaling\docker-compose.yml.template' -Raw
+        $template = Get-Content 'C:\compose\autoscaling\docker-compose.yml.template' -Raw
         $expanded = Invoke-Expression "@`"`r`n$template`r`n`"@"
-        $expanded | Out-File "s:\compose\autoscaling\docker-compose.yml" -Encoding ASCII
+        $expanded | Out-File "C:\compose\autoscaling\docker-compose.yml" -Encoding ASCII
 
-        Invoke-Expression "docker stack deploy -c s:\compose\autoscaling\docker-compose.yml autoscaling"
+        Invoke-Expression "docker stack deploy -c C:\compose\autoscaling\docker-compose.yml autoscaling"
     }
 }
 

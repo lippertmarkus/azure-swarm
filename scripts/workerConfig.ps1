@@ -34,7 +34,7 @@ param(
 
 if (-not $restart) {
     # initial
-    [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/cosmoconsult/azure-swarm/$branch/scripts/mountAzFileShare.ps1", 5, 10, $null, "c:\scripts\mountAzFileShare.ps1", $false)
+    [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/$branch/scripts/mountAzFileShare.ps1", 5, 10, $null, "c:\scripts\mountAzFileShare.ps1", $false)
 
     $tries = 1
     while ($tries -le 10) { 
@@ -50,14 +50,14 @@ if (-not $restart) {
 
     # Setup profile
     Write-Debug "Download profile file"
-    [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/cosmoconsult/azure-swarm/$branch/scripts/profile.ps1", 5, 10, $null, $PROFILE.AllUsersAllHosts, $false)
+    [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/$branch/scripts/profile.ps1", 5, 10, $null, $PROFILE.AllUsersAllHosts, $false)
 
     # Choco and SSH
     Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
     choco feature enable -n allowGlobalConfirmation
     choco install --no-progress --limit-output vim
     choco install --no-progress --limit-output openssh -params '"/SSHServerFeature"'
-    [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/cosmoconsult/azure-swarm/$branch/configs/sshd_config_wpwd", 5, 10, $null, 'C:\ProgramData\ssh\sshd_config', $false)
+    [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/$branch/configs/sshd_config_wpwd", 5, 10, $null, 'C:\ProgramData\ssh\sshd_config', $false)
     New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force
     Restart-Service sshd
 
