@@ -1,0 +1,125 @@
+version: "3.9"
+
+networks:
+  monitoring:
+    driver: overlay
+    attachable: true
+  traefik-public:
+    external: true
+
+volumes:
+  prometheus:
+  grafana:
+
+services:
+  ## TODO add autoscaler
+
+  cStatsExporter:
+    image: alexvaut/cstatsexporter:latest
+    isolation: hyperv
+    networks:
+      - monitoring
+    volumes:
+      - source: '\\.\pipe\docker_engine'
+        target: '\\.\pipe\docker_engine'
+        type: npipe
+    deploy:
+      mode: global
+      placement:        
+        constraints:
+          - "node.platform.os == windows"
+
+  windows-exporter:
+    image: ghcr.io/lippertmarkus/windows-exporter:2004
+    networks:
+      - monitoring
+    volumes:
+      - source: 'C:\'
+        target: 'C:\host'
+        type: bind
+      - source: '\\.\pipe\rancher_wins'
+        target: '\\.\pipe\rancher_wins'
+        type: npipe
+      - source: '\\.\pipe\rancher_wins_proxy'
+        target: '\\.\pipe\rancher_wins_proxy'
+        type: npipe
+    deploy:
+      mode: global
+      placement:        
+        constraints:
+          - "node.platform.os == windows"
+
+  dockerd-exporter:
+    image: ghcr.io/lippertmarkus/dockerd-exporter:2004
+    networks:
+      - monitoring
+    volumes:
+      - source: '\\.\pipe\rancher_wins_proxy'
+        target: '\\.\pipe\rancher_wins_proxy'
+        type: npipe
+    deploy:
+      mode: global
+      placement:        
+        constraints:
+          - "node.platform.os == windows"
+
+
+  prometheus:
+    image: ghcr.io/lippertmarkus/prometheus-autoscaling:2004
+    networks:
+      - monitoring
+      - traefik-public
+    volumes:
+      - prometheus:/prometheus
+    volumes:
+      - source: '\\.\pipe\docker_engine'
+        target: '\\.\pipe\docker_engine'
+        type: npipe
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          memory: 2048M
+        reservations:
+          memory: 128M
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.prometheus.rule=Host(``$externaldns``) && PathPrefix(``/prometheus``)
+        - traefik.http.middlewares.prometheus.stripprefix.prefixes=/prometheus
+        - traefik.http.routers.prometheus.entrypoints=websecure
+        - traefik.http.routers.prometheus.tls.certresolver=myresolver
+        - traefik.http.routers.prometheus.middlewares=prometheus@docker
+        - traefik.http.services.prometheus.loadBalancer.server.scheme=http
+        - traefik.http.services.prometheus.loadBalancer.server.port=9090
+  
+  grafana:
+    image: ghcr.io/lippertmarkus/grafana:2004
+    networks:
+      - monitoring
+      - traefik-public
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://$externaldns/grafana/
+    volumes:
+      - grafana:/var/lib/grafana
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.grafana.rule=Host(``$externaldns``) && PathPrefix(``/grafana``)
+        - traefik.http.middlewares.grafana.stripprefix.prefixes=/grafana
+        - traefik.http.routers.grafana.entrypoints=websecure
+        - traefik.http.routers.grafana.tls.certresolver=myresolver
+        - traefik.http.routers.grafana.middlewares=grafana@docker
+        - traefik.http.services.grafana.loadBalancer.server.scheme=http
+        - traefik.http.services.grafana.loadBalancer.server.port=3000

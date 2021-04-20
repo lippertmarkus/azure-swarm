@@ -101,7 +101,7 @@ resource "azurerm_virtual_machine_extension" "initJumpBox" {
   settings = <<SETTINGS
     {
       "fileUris": [
-        "https://raw.githubusercontent.com/cosmoconsult/azure-swarm/${var.branch}/scripts/jumpboxConfig.ps1"
+        "https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/${var.branch}/scripts/jumpboxConfig.ps1"
       ]
     }
   SETTINGS

@@ -9,12 +9,6 @@ terraform {
       version = "=2.3.0"
     }
   }
-
-  backend "azurerm" {
-    key                  = "terraform.tfstate"
-    storage_account_name = "terraformforselfservice"
-    resource_group_name  = "PPI-Config-Secrets-Share"
-  }
 }
 
 provider "azurerm" {
@@ -23,13 +17,6 @@ provider "azurerm" {
       purge_soft_delete_on_destroy = true
     }
   }
-}
-
-provider "azurerm" {
-  features {
-  }
-  subscription_id = var.syncKeyVaultSubscription
-  alias           = "azurerm_sync_kv"
 }
 
 resource "random_password" "password" {
@@ -122,54 +109,5 @@ resource "azurerm_key_vault" "main" {
 resource "azurerm_key_vault_secret" "sshPubKey" {
   name         = "sshPubKey"
   value        = file(pathexpand("~/.ssh/id_rsa.pub"))
-  key_vault_id = azurerm_key_vault.main.id
-}
-
-resource "azurerm_key_vault_secret" "rabbitmq-vhost" {
-  count        = var.rabbitMqVhost == null ? 0 : 1
-  name         = "Services--RabbitMq--VirtualHost"
-  value        = var.rabbitMqVhost
-  key_vault_id = azurerm_key_vault.main.id
-}
-
-resource "azurerm_key_vault_secret" "rabbitmq-user-extension" {
-  count        = var.rabbitMqUserExtension == null ? 0 : 1
-  name         = "Services--RabbitMq--VsCodeUser"
-  value        = var.rabbitMqUserExtension
-  key_vault_id = azurerm_key_vault.main.id
-}
-
-resource "azurerm_key_vault_secret" "rabbitmq-password-extension" {
-  count        = var.rabbitMqPasswordExtension == null ? 0 : 1
-  name         = "Services--RabbitMq--VsCodePassword"
-  value        = var.rabbitMqPasswordExtension
-  key_vault_id = azurerm_key_vault.main.id
-}
-
-resource "azurerm_key_vault_secret" "rabbitmq-user" {
-  count        = var.rabbitMqUser == null ? 0 : 1
-  name         = "Services--RabbitMq--Username"
-  value        = var.rabbitMqUser
-  key_vault_id = azurerm_key_vault.main.id
-}
-
-resource "azurerm_key_vault_secret" "rabbitmq-password" {
-  count        = var.rabbitMqPassword == null ? 0 : 1
-  name         = "Services--RabbitMq--Password"
-  value        = var.rabbitMqPassword
-  key_vault_id = azurerm_key_vault.main.id
-}
-
-resource "azurerm_key_vault_secret" "auth-valid-tenants" {
-  count        = var.authValidTenants == null ? 0 : 1
-  name         = "ValidTenants"
-  value        = var.authValidTenants
-  key_vault_id = azurerm_key_vault.main.id
-}
-
-resource "azurerm_key_vault_secret" "appinsights-key" {
-  count        = var.dockerAutomationAppInsightsKey == null ? 0 : 1
-  name         = "ApplicationInsights--InstrumentationKey"
-  value        = var.dockerAutomationAppInsightsKey
   key_vault_id = azurerm_key_vault.main.id
 }

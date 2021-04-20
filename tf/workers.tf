@@ -62,30 +62,13 @@ resource "azurerm_virtual_machine_scale_set" "worker" {
 
     settings = jsonencode({
       "fileUris" = [
-        "https://raw.githubusercontent.com/cosmoconsult/azure-swarm/${var.branch}/scripts/workerSetupTasks.ps1"
+        "https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/${var.branch}/scripts/workerSetupTasks.ps1"
       ]
     })
 
     protected_settings = jsonencode({
       "commandToExecute" = "powershell -ExecutionPolicy Unrestricted -File workerSetupTasks.ps1 -images \"${var.images}\" -branch \"${var.branch}\" -additionalPreScript \"${var.additionalPreScriptWorker}\" -additionalPostScript \"${var.additionalPostScriptWorker}\" -name \"${local.name}\" -storageAccountName \"${azurerm_storage_account.main.name}\" -storageAccountKey \"${azurerm_storage_account.main.primary_access_key}\" -authToken \"${var.authHeaderValue}\" -debugScripts \"${var.debugScripts}\""
     })
-  }
-
-  extension {
-    name                       = "monitorMgr1"
-    publisher                  = "Microsoft.EnterpriseCloud.Monitoring"
-    type                       = "MicrosoftMonitoringAgent"
-    type_handler_version       = "1.0"
-    auto_upgrade_minor_version = true
-
-    settings = jsonencode({
-      "workspaceId" = azurerm_log_analytics_workspace.log.workspace_id
-    })
-
-    protected_settings = jsonencode({
-      "workspaceKey" = azurerm_log_analytics_workspace.log.primary_shared_key
-    })
-
   }
 
   os_profile_windows_config {

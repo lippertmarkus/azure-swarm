@@ -58,7 +58,7 @@ variable "adminUsername" {
 }
 
 variable "branch" {
-  description = "The branch of https://github.com/cosmoconsult/azure-swarm to use for downloading files"
+  description = "The branch of https://github.com/lippertmarkus/azure-swarm-autoscaling to use for downloading files"
   default     = "master"
 }
 
@@ -115,54 +115,4 @@ variable "authHeaderValue" {
 variable "debugScripts" {
   description = "defines whether the called PowerShell scripts show debug output"
   default     = "false"
-}
-
-variable "rabbitMqVhost" {
-  description = "The virtual host for connecting to RabbitMQ"
-  default     = null
-}
-
-variable "rabbitMqUserExtension" {
-  description = "The username for connecting to RabbitMQ from the VS Code Extension"
-  default     = null
-}
-
-variable "rabbitMqPasswordExtension" {
-  description = "The password for connecting to RabbitMQ from the VS Code Extension"
-  default     = null
-}
-
-variable "rabbitMqUser" {
-  description = "The username for connecting to RabbitMQ"
-  default     = null
-}
-
-variable "rabbitMqPassword" {
-  description = "The password for connecting to RabbitMQ"
-  default     = null
-}
-
-variable "dockerAutomationAppInsightsKey" {
-  description = "The application insights key to use for docker-automation"
-  default     = "5d632878-a47b-440e-9ec3-2dd8a212fd3c"
-}
-
-variable "authValidTenants" {
-  description = "Comma-separated string of valid tenant ids allowed to authenticate against services within the swarm"
-  default     = null
-}
-
-variable "syncKeyVaultSubscription" {
-  description = "ID of the subscription with the key vault to sync"
-  default     = "1e79199c-e5f9-4e36-a1fe-0754d703c218"
-}
-
-variable "syncKeyVaultResourceGroup" {
-  description = "Name of the resource group with key vault to sync"
-  default     = "PPI-Config-Secrets-Share"
-}
-
-variable "syncKeyVaultName" {
-  description = "Name of the key vault to sync"
-  default     = "cc-ppi"
 }
