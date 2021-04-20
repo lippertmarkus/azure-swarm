@@ -28,6 +28,7 @@ services:
       placement:        
         constraints:
           - "node.platform.os == windows"
+          - node.role == worker
 
   windows-exporter:
     image: ghcr.io/lippertmarkus/windows-exporter:2004
@@ -48,6 +49,7 @@ services:
       placement:        
         constraints:
           - "node.platform.os == windows"
+          - node.role == worker
 
   dockerd-exporter:
     image: ghcr.io/lippertmarkus/dockerd-exporter:2004
@@ -62,6 +64,7 @@ services:
       placement:        
         constraints:
           - "node.platform.os == windows"
+          - node.role == worker
 
 
   prometheus:
@@ -106,8 +109,8 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_SERVER_ROOT_URL=https://$externaldns/grafana/
-    volumes:
-      - grafana:/var/lib/grafana
+    #volumes:
+    #  - grafana:/var/lib/grafana
     deploy:
       mode: replicated
       replicas: 1
