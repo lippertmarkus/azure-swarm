@@ -65,6 +65,14 @@ output "portainer" {
   value = "https://${azurerm_public_ip.main-lb.fqdn}/portainer/"
 }
 
+output "prometheus" {
+  value = "https://${azurerm_public_ip.main-lb.fqdn}/prometheus/graph"
+}
+
+output "grafana" {
+  value = "https://${azurerm_public_ip.main-lb.fqdn}/grafana/d/-oeW2rXMz"
+}
+
 output "ssh-copy-private-key" {
   value = "If you know what you are doing (this is copying your PRIVATE ssh key): ssh -l ${var.adminUsername} ${azurerm_public_ip.jumpbox.fqdn} \"mkdir c:\\users\\${var.adminUsername}\\.ssh\"; scp $HOME\\.ssh\\id_rsa ${var.adminUsername}@${azurerm_public_ip.jumpbox.fqdn}:c:\\users\\${var.adminUsername}\\.ssh"
 }
