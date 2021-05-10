@@ -9,10 +9,213 @@ networks:
 
 volumes:
   prometheus:
-  grafana:
 
 services:
-  ## TODO add autoscaler
+  base-workload1:
+    image: ghcr.io/lippertmarkus/app-example:2004
+    networks:
+      - traefik-public
+    volumes:
+      - source: '\\.\pipe\docker_engine'
+        target: '\\.\pipe\docker_engine'
+        type: npipe
+    labels:
+      - IsStateful=true
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          memory: 4096M
+      labels:
+        - IsStateful=true
+
+  base-workload2:
+    image: ghcr.io/lippertmarkus/app-example:2004
+    networks:
+      - traefik-public
+    volumes:
+      - source: '\\.\pipe\docker_engine'
+        target: '\\.\pipe\docker_engine'
+        type: npipe
+    labels:
+      - IsStateful=true
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          memory: 4096M
+      labels:
+        - IsStateful=true
+
+  base-workload3:
+    image: ghcr.io/lippertmarkus/app-example:2004
+    networks:
+      - traefik-public
+    volumes:
+      - source: '\\.\pipe\docker_engine'
+        target: '\\.\pipe\docker_engine'
+        type: npipe
+    labels:
+      - IsStateful=true
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          memory: 4096M
+      labels:
+        - IsStateful=true
+
+  base-workload4:
+    image: ghcr.io/lippertmarkus/app-example:2004
+    networks:
+      - traefik-public
+    volumes:
+      - source: '\\.\pipe\docker_engine'
+        target: '\\.\pipe\docker_engine'
+        type: npipe
+    labels:
+      - IsStateful=true
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          memory: 4096M
+      labels:
+        - IsStateful=true
+
+  base-workload5:
+    image: ghcr.io/lippertmarkus/app-example:2004
+    networks:
+      - traefik-public
+    volumes:
+      - source: '\\.\pipe\docker_engine'
+        target: '\\.\pipe\docker_engine'
+        type: npipe
+    labels:
+      - IsStateful=true
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          memory: 4096M
+      labels:
+        - IsStateful=true
+
+  base-workload6:
+    image: ghcr.io/lippertmarkus/app-example:2004
+    networks:
+      - traefik-public
+    volumes:
+      - source: '\\.\pipe\docker_engine'
+        target: '\\.\pipe\docker_engine'
+        type: npipe
+    labels:
+      - IsStateful=true
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          memory: 4096M
+      labels:
+        - IsStateful=true
+
+  base-workload7:
+    image: ghcr.io/lippertmarkus/app-example:2004
+    networks:
+      - traefik-public
+    volumes:
+      - source: '\\.\pipe\docker_engine'
+        target: '\\.\pipe\docker_engine'
+        type: npipe
+    labels:
+      - IsStateful=true
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          memory: 4096M
+      labels:
+        - IsStateful=true
+
+  autoscaler:
+    image: ghcr.io/lippertmarkus/autoscaler:2004
+    networks:
+      - monitoring
+    environment:
+      GENERAL__SWARMURL: "npipe://./pipe/docker_engine"
+      AUTOSCALING__GracePeriodForNewNodesInMinutes: 10
+      GENERAL__PrometheusApi: "https://$externaldns/prometheus/api/"
+      # TODO add all other variables
+      #GENERAL__Azure__subscriptionId: ""
+      #GENERAL__Azure__tenantId: ""
+      #GENERAL__Azure__resourceGroup: ""
+      #GENERAL__Azure__vmss: ""
+    volumes:
+      - source: 'C:\wins'
+        target: 'C:\wins'
+        type: bind
+      - source: '\\.\pipe\rancher_wins'
+        target: '\\.\pipe\rancher_wins'
+        type: npipe
+      - source: '\\.\pipe\docker_engine'
+        target: '\\.\pipe\docker_engine'
+        type: npipe
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:        
+        constraints:
+          - "node.platform.os == windows"
+          - node.role == manager
+
+  simulator:
+    image: ghcr.io/lippertmarkus/autoscaling-simulator:2004
+    networks:
+      - monitoring
+    environment:
+      GENERAL__PrometheusApi: "https://$externaldns/prometheus/api/"
+      GENERAL__PublicDns: "$externaldns"
+      GENERAL__SWARMURL: "npipe://./pipe/docker_engine"
+      GENERAL__ServiceStartupTimeInMinutes: 1
+    volumes:
+      - source: '\\.\pipe\docker_engine'
+        target: '\\.\pipe\docker_engine'
+        type: npipe
+    deploy:
+      mode: replicated
+      replicas: 0
+      placement:        
+        constraints:
+          - "node.platform.os == windows"
+          - node.role == manager
 
   cStatsExporter:
     image: alexvaut/cstatsexporter:latest
@@ -109,8 +312,6 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_SERVER_ROOT_URL=https://$externaldns/grafana/
-    #volumes:
-    #  - grafana:/var/lib/grafana
     deploy:
       mode: replicated
       replicas: 1

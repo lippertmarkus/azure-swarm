@@ -270,6 +270,46 @@ resource "azurerm_virtual_machine_extension" "initMgr3" {
 
 }
 
+resource "azurerm_role_assignment" "mgr1" {
+  scope                = azurerm_virtual_machine_scale_set.worker.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_windows_virtual_machine.mgr1.identity.0.principal_id
+}
+
+resource "azurerm_role_assignment" "mgr2" {
+  count        = var.managerVmSettings.useThree ? 1 : 0
+  scope                = azurerm_virtual_machine_scale_set.worker.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_windows_virtual_machine.mgr2.identity.0.principal_id
+}
+
+resource "azurerm_role_assignment" "mgr3" {
+  count        = var.managerVmSettings.useThree ? 1 : 0
+  scope                = azurerm_virtual_machine_scale_set.worker.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_windows_virtual_machine.mgr3.identity.0.principal_id
+}
+
+resource "azurerm_role_assignment" "mgr1" {
+  scope                = azurerm_virtual_network.main.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_windows_virtual_machine.mgr1.identity.0.principal_id
+}
+
+resource "azurerm_role_assignment" "mgr2" {
+  count        = var.managerVmSettings.useThree ? 1 : 0
+  scope                = azurerm_virtual_network.main.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_windows_virtual_machine.mgr2.identity.0.principal_id
+}
+
+resource "azurerm_role_assignment" "mgr3" {
+  count        = var.managerVmSettings.useThree ? 1 : 0
+  scope                = azurerm_virtual_network.main.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_windows_virtual_machine.mgr3.identity.0.principal_id
+}
+
 resource "azurerm_key_vault_access_policy" "mgr1" {
   key_vault_id = azurerm_key_vault.main.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
