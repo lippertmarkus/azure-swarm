@@ -61,7 +61,23 @@ param(
 
     [Parameter(Mandatory = $True)]
     [string]
-    $cosmoInternal
+    $cosmoInternal,
+
+    [Parameter(Mandatory = $true)]
+    [string]
+    $subscriptionId,
+
+    [Parameter(Mandatory = $true)]
+    [string]
+    $tenantId,
+
+    [Parameter(Mandatory = $true)]
+    [string]
+    $resourceGroup,
+
+    [Parameter(Mandatory = $true)]
+    [string]
+    $vmssName
 )
 
 if ($debugScripts -eq "true") {
@@ -212,10 +228,10 @@ Write-Debug "Download task files"
 [DownloadWithRetry]::DoDownloadWithRetry("https://raw.githubusercontent.com/lippertmarkus/azure-swarm-autoscaling/$branch/scripts/mgrConfig.ps1", 5, 10, $null, "c:\scripts\mgrConfig.ps1", $false)
 
 Write-Debug "call mgrConfig script"
-& 'c:\scripts\mgrConfig.ps1' -name "$name" -externaldns "$externaldns" -cleanupThresholdGb $cleanupThresholdGb -cosmoInternal "$cosmoInternal" -dockerdatapath "$dockerdatapath" -email "$email" -additionalPostScript "$additionalPostScript" -branch "$branch" -storageAccountName "$storageAccountName" -storageAccountKey "$storageAccountKey" -isFirstMgr:$isFirstMgr -authToken "$authToken" 2>&1 >> c:\scripts\log.txt
+& 'c:\scripts\mgrConfig.ps1' -name "$name" -externaldns "$externaldns" -cleanupThresholdGb $cleanupThresholdGb -cosmoInternal "$cosmoInternal" -dockerdatapath "$dockerdatapath" -email "$email" -additionalPostScript "$additionalPostScript" -subscriptionId "$subscriptionId" -tenantId "$tenantId" -resourceGroup "$resourceGroup" -vmssName "$vmssName" -branch "$branch" -storageAccountName "$storageAccountName" -storageAccountKey "$storageAccountKey" -isFirstMgr:$isFirstMgr -authToken "$authToken" 2>&1 >> c:\scripts\log.txt
 
 Write-Debug "set up reboot task"
-$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Unrestricted -Command `"& 'c:\scripts\mgrConfig.ps1' -name $name -externaldns '$externaldns' -dockerdatapath '$dockerdatapath' -email '$email' -additionalPostScript '$additionalPostScript' -branch '$branch' -storageAccountName '$storageAccountName' -storageAccountKey '$storageAccountKey' -isFirstMgr:`$$isFirstMgr -restart -authToken '$authToken'`" 2>&1 >> c:\scripts\log.txt"
+$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Unrestricted -Command `"& 'c:\scripts\mgrConfig.ps1' -name $name -externaldns '$externaldns' -dockerdatapath '$dockerdatapath' -email '$email' -additionalPostScript '$additionalPostScript' -subscriptionId '$subscriptionId' -tenantId '$tenantId' -resourceGroup '$resourceGroup' -vmssName '$vmssName' -branch '$branch' -storageAccountName '$storageAccountName' -storageAccountKey '$storageAccountKey' -isFirstMgr:`$$isFirstMgr -restart -authToken '$authToken'`" 2>&1 >> c:\scripts\log.txt"
 $trigger = New-ScheduledTaskTrigger -AtStartup -RandomDelay 00:00:30
 $principal = New-ScheduledTaskPrincipal -UserID "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest
 Register-ScheduledTask -Action $action -Trigger $trigger -Principal $principal -TaskName "MgrConfigReboot" -Description "This task should configure the manager after a reboot"

@@ -145,7 +145,7 @@ resource "azurerm_virtual_machine_extension" "initMgr1" {
   })
 
   protected_settings = jsonencode({
-    "commandToExecute" = "powershell -ExecutionPolicy Unrestricted -File mgrInitSwarmAndSetupTasks.ps1 -externaldns \"${local.name}.${var.location}.cloudapp.azure.com\" -cleanupThresholdGb \"${var.cleanupThresholdGb}\" -cosmoInternal \"${var.cosmoInternal}\" -email \"${var.eMail}\" -branch \"${var.branch}\" -additionalPreScript \"${var.additionalPreScriptMgr}\" -additionalPostScript \"${var.additionalPostScriptMgr}\" -dockerdatapath \"${var.dockerdatapath}\" -name \"${local.name}\" -storageAccountName \"${azurerm_storage_account.main.name}\" -storageAccountKey \"${azurerm_storage_account.main.primary_access_key}\" -adminPwd \"${random_password.password.result}\" -isFirstmgr -authToken \"${var.authHeaderValue}\" -debugScripts \"${var.debugScripts}\""
+    "commandToExecute" = "powershell -ExecutionPolicy Unrestricted -File mgrInitSwarmAndSetupTasks.ps1 -subscriptionId \"${data.azurerm_subscription.current.subscription_id}\" -tenantId \"${data.azurerm_subscription.current.tenant_id}\" -resourceGroup \"${azurerm_resource_group.main.name}\" -vmssName \"${local.name}-worker-vmss\" -externaldns \"${local.name}.${var.location}.cloudapp.azure.com\" -cleanupThresholdGb \"${var.cleanupThresholdGb}\" -cosmoInternal \"${var.cosmoInternal}\" -email \"${var.eMail}\" -branch \"${var.branch}\" -additionalPreScript \"${var.additionalPreScriptMgr}\" -additionalPostScript \"${var.additionalPostScriptMgr}\" -dockerdatapath \"${var.dockerdatapath}\" -name \"${local.name}\" -storageAccountName \"${azurerm_storage_account.main.name}\" -storageAccountKey \"${azurerm_storage_account.main.primary_access_key}\" -adminPwd \"${random_password.password.result}\" -isFirstmgr -authToken \"${var.authHeaderValue}\" -debugScripts \"${var.debugScripts}\""
   })
 
 }
@@ -270,44 +270,44 @@ resource "azurerm_virtual_machine_extension" "initMgr3" {
 
 }
 
-resource "azurerm_role_assignment" "mgr1" {
+resource "azurerm_role_assignment" "mgr1_vmss" {
   scope                = azurerm_virtual_machine_scale_set.worker.id
   role_definition_name = "Contributor"
   principal_id         = azurerm_windows_virtual_machine.mgr1.identity.0.principal_id
 }
 
-resource "azurerm_role_assignment" "mgr2" {
+resource "azurerm_role_assignment" "mgr2_vmss" {
   count        = var.managerVmSettings.useThree ? 1 : 0
   scope                = azurerm_virtual_machine_scale_set.worker.id
   role_definition_name = "Contributor"
-  principal_id         = azurerm_windows_virtual_machine.mgr2.identity.0.principal_id
+  principal_id         = azurerm_windows_virtual_machine.mgr2[0].identity.0.principal_id
 }
 
-resource "azurerm_role_assignment" "mgr3" {
+resource "azurerm_role_assignment" "mgr3_vmss" {
   count        = var.managerVmSettings.useThree ? 1 : 0
   scope                = azurerm_virtual_machine_scale_set.worker.id
   role_definition_name = "Contributor"
-  principal_id         = azurerm_windows_virtual_machine.mgr3.identity.0.principal_id
+  principal_id         = azurerm_windows_virtual_machine.mgr3[0].identity.0.principal_id
 }
 
-resource "azurerm_role_assignment" "mgr1" {
+resource "azurerm_role_assignment" "mgr1_vnet" {
   scope                = azurerm_virtual_network.main.id
   role_definition_name = "Contributor"
   principal_id         = azurerm_windows_virtual_machine.mgr1.identity.0.principal_id
 }
 
-resource "azurerm_role_assignment" "mgr2" {
+resource "azurerm_role_assignment" "mgr2_vnet" {
   count        = var.managerVmSettings.useThree ? 1 : 0
   scope                = azurerm_virtual_network.main.id
   role_definition_name = "Contributor"
-  principal_id         = azurerm_windows_virtual_machine.mgr2.identity.0.principal_id
+  principal_id         = azurerm_windows_virtual_machine.mgr2[0].identity.0.principal_id
 }
 
-resource "azurerm_role_assignment" "mgr3" {
+resource "azurerm_role_assignment" "mgr3_vnet" {
   count        = var.managerVmSettings.useThree ? 1 : 0
   scope                = azurerm_virtual_network.main.id
   role_definition_name = "Contributor"
-  principal_id         = azurerm_windows_virtual_machine.mgr3.identity.0.principal_id
+  principal_id         = azurerm_windows_virtual_machine.mgr3[0].identity.0.principal_id
 }
 
 resource "azurerm_key_vault_access_policy" "mgr1" {

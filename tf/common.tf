@@ -19,6 +19,9 @@ provider "azurerm" {
   }
 }
 
+data "azurerm_subscription" "current" {
+}
+
 resource "random_password" "password" {
   length           = 16
   special          = true

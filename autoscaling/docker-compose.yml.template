@@ -173,11 +173,10 @@ services:
       GENERAL__SWARMURL: "npipe://./pipe/docker_engine"
       AUTOSCALING__GracePeriodForNewNodesInMinutes: 10
       GENERAL__PrometheusApi: "https://$externaldns/prometheus/api/"
-      # TODO add all other variables
-      #GENERAL__Azure__subscriptionId: ""
-      #GENERAL__Azure__tenantId: ""
-      #GENERAL__Azure__resourceGroup: ""
-      #GENERAL__Azure__vmss: ""
+      GENERAL__Azure__subscriptionId: "$subscriptionId"
+      GENERAL__Azure__tenantId: "$tenantId"
+      GENERAL__Azure__resourceGroup: "$resourceGroup"
+      GENERAL__Azure__vmss: "$vmssName"
     volumes:
       - source: 'C:\wins'
         target: 'C:\wins'

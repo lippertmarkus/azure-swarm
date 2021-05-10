@@ -16,7 +16,7 @@ Doing:
 1. `az login`
 1. `az account set --subscription="..."`
 1. `terraform init`
-1. `terraform apply -var-file ..\autoscaling\swarm.tfvars`
+1. `terraform apply -var-file ..\autoscaling\swarm.tfvars -auto-approve`
 
 Cleanup:
 `terraform destroy`

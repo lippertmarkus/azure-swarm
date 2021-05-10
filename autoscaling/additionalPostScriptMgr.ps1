@@ -29,7 +29,23 @@ param(
 
     [Parameter(Mandatory = $true)]
     [string]
-    $cosmoInternal
+    $cosmoInternal,
+
+    [Parameter(Mandatory = $true)]
+    [string]
+    $subscriptionId,
+
+    [Parameter(Mandatory = $true)]
+    [string]
+    $tenantId,
+
+    [Parameter(Mandatory = $true)]
+    [string]
+    $resourceGroup,
+
+    [Parameter(Mandatory = $true)]
+    [string]
+    $vmssName
 )
 
 if (-not $restart) {
